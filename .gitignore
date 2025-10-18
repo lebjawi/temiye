@@ -39,6 +39,7 @@ angular.json.bak
 .env
 .env.local
 .env.*.local
+privateKey.json
 
 # Firebase
 .firebase/
