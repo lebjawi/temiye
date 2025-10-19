@@ -13,6 +13,7 @@ import { logger, logHttpRequest } from './shared/utils/logger.util';
 import constantsRoutes from './domains/constants/constants.routes';
 import roleRoutes from './domains/role/role.routes';
 import tierRoutes from './domains/tier/tier.routes';
+import authRoutes from './domains/auth/auth.routes';
 import userRoutes from './domains/user/user.routes';
 import adminRoutes from './domains/admin/admin.routes';
 import passwordResetRoutes from './domains/password-reset/password-reset.routes';
@@ -507,8 +508,12 @@ Some endpoints are cached to reduce Firestore reads:
           description: 'System configuration constants'
         },
         {
+          name: 'Auth',
+          description: 'Authentication endpoints (User login, Admin login, Token refresh)'
+        },
+        {
           name: 'User',
-          description: 'User management and authentication (Phone + Password)'
+          description: 'User management and registration'
         },
         {
           name: 'Role',
@@ -572,8 +577,10 @@ Some endpoints are cached to reduce Firestore reads:
   app.use('/api/roles', roleRoutes);
   app.use('/api/tiers', tierRoutes);
 
-  // Auth endpoints with strict rate limiting
-  app.use('/api/users/login', authLimiter);
+  // Auth endpoints with strict rate limiting (MUST be before user routes)
+  app.use('/api/auth', authLimiter, authRoutes);
+
+  // User registration with strict rate limiting
   app.use('/api/users/register', authLimiter);
   app.use('/api/users', userRoutes);
 

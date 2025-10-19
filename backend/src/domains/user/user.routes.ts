@@ -5,6 +5,7 @@ import { UserRepository } from './repositories/user.repository';
 import { StorageService } from '../storage/services/storage.service';
 import { StorageRepository } from '../storage/repositories/storage.repository';
 import { getDb } from '../../shared/config/firebase.config';
+import { authenticateJWT, requireRole, requireActive } from '../auth/middleware/auth.middleware';
 
 const userRepository = new UserRepository(getDb());
 const storageRepository = new StorageRepository(getDb());
@@ -16,14 +17,15 @@ const router = Router();
 
 // Public routes (no auth required)
 router.post('/register', (req, res, next) => userController.register(req, res, next));
-router.post('/login', (req, res, next) => userController.login(req, res, next));
 
-// Protected routes (auth required) - temporarily disabled for testing
-router.get('/', (req, res, next) => userController.getAllUsers(req, res, next));
-router.get('/pending', (req, res, next) => userController.getPendingApprovals(req, res, next));
-router.get('/:id', (req, res, next) => userController.getUserById(req, res, next));
-router.put('/:id', (req, res, next) => userController.updateUser(req, res, next));
-router.post('/:id/approve', (req, res, next) => userController.approveUser(req, res, next));
-router.post('/:id/ban', (req, res, next) => userController.banUser(req, res, next));
+// NOTE: Login moved to /api/auth/login/user (handled by auth domain)
+
+// Protected routes (auth required)
+router.get('/', authenticateJWT, requireRole(['admin']), (req, res, next) => userController.getAllUsers(req, res, next));
+router.get('/pending', authenticateJWT, requireRole(['admin']), (req, res, next) => userController.getPendingApprovals(req, res, next));
+router.get('/:id', authenticateJWT, requireActive, (req, res, next) => userController.getUserById(req, res, next));
+router.put('/:id', authenticateJWT, requireActive, (req, res, next) => userController.updateUser(req, res, next));
+router.post('/:id/approve', authenticateJWT, requireRole(['admin']), (req, res, next) => userController.approveUser(req, res, next));
+router.post('/:id/ban', authenticateJWT, requireRole(['admin']), (req, res, next) => userController.banUser(req, res, next));
 
 export default router;

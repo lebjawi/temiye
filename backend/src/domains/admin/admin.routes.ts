@@ -3,6 +3,7 @@ import { AdminController } from './controllers/admin.controller';
 import { AdminService } from './services/admin.service';
 import { AdminRepository } from './repositories/admin.repository';
 import { getDb } from '../../shared/config/firebase.config';
+import { authenticateJWT, requireRole } from '../auth/middleware/auth.middleware';
 
 const router = Router();
 
@@ -10,6 +11,10 @@ const router = Router();
 const adminRepository = new AdminRepository(getDb());
 const adminService = new AdminService(adminRepository);
 const adminController = new AdminController(adminService);
+
+// All admin routes require authentication and admin role
+router.use(authenticateJWT);
+router.use(requireRole(['admin']));
 
 // Admin routes
 router.post('/', (req, res, next) => adminController.createAdmin(req, res, next));
