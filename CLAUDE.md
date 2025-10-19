@@ -53,16 +53,42 @@ This document tracks the development roadmap for the Tenmiye Community Managemen
 ### Phase 1: Core Data & Business Logic ⏳ (CURRENT)
 
 #### 1.1 Express Backend - Core Controllers
+
+**Foundation (Phase 1.1) - Week 1-2**
+- [x] **ConstantsController** (CRUD + named getters) ✅ COMPLETE
+  - Endpoints: GET, PUT, POST /initialize
+  - Caching: 5-minute in-memory cache
+  - Swagger: Fully documented
+  - Status: Tested via curl + Swagger UI
+  - Collection: config/settings in Firestore
+- [x] **RoleController** (CRUD + predefined roles) ✅ COMPLETE
+  - Endpoints: GET, POST, PUT, DELETE, GET /level/:level
+  - Predefined roles: member, board, admin, superadmin
+  - Protection: Cannot delete predefined or if users assigned
+  - Swagger: Fully documented
+  - Status: Tested via curl + Swagger UI
+  - Collection: roles in Firestore (4 documents)
+- [x] **TierController** (CRUD + predefined tiers) ✅ COMPLETE
+  - Endpoints: GET, POST, PUT, DELETE
+  - Predefined tiers: bronze, silver, gold, platinum
+  - Protection: Cannot delete predefined or if users assigned
+  - Swagger: Fully documented
+  - Status: Tested via curl
+  - Collection: tiers in Firestore (4 documents)
+
+**Identity & Auth (Phase 1.2) - Week 3-4**
 - [ ] UserController (CRUD + custom auth for main app)
-- [ ] RoleController (CRUD)
-- [ ] TierController (CRUD)
-- [ ] BoardController (CRUD)
-- [ ] TransactionController (CRUD)
-- [ ] ElectionController (CRUD)
-- [ ] VoteController (CRUD)
-- [ ] AnnouncementController (CRUD)
 - [ ] AdminController (CRUD + approval workflow)
 - [ ] PasswordResetController (Send reset codes)
+
+**Core Features (Phase 1.3) - Week 5-6**
+- [ ] BoardController (CRUD)
+- [ ] TransactionController (CRUD)
+- [ ] AnnouncementController (CRUD)
+
+**Voting System (Phase 1.4) - Week 7-8**
+- [ ] ElectionController (CRUD)
+- [ ] VoteController (CRUD)
 
 #### 1.2 Authentication Backend Logic
 - [ ] **Main App Auth**: Phone + password custom auth in Express
