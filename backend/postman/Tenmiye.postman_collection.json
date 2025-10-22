@@ -1,0 +1,667 @@
+{
+  "info": {
+    "name": "Tenmiye Community Management API",
+    "description": "Complete API collection for Tenmiye Backend - El Gheddiya, Teganet, Mauritania",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "tenmiye"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "health"]
+            }
+          }
+        },
+        {
+          "name": "API Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Auth",
+      "item": [
+        {
+          "name": "Google Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('adminToken', response.data.token);",
+                  "    pm.environment.set('adminId', response.data.admin.id);",
+                  "    console.log('Admin token saved!');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"{{firebaseIdToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/admin/auth/google",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "admin", "auth", "google"]
+            },
+            "description": "Login with Google Firebase ID token"
+          }
+        },
+        {
+          "name": "Get Current Admin",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/admin/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "admin", "auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('token', response.data.token);",
+                  "    pm.environment.set('userId', response.data.user.id);",
+                  "    console.log('User registered! Token saved.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+22212345678\",\n  \"nameAr\": \"أحمد محمد\",\n  \"nameFr\": \"Ahmed Mohamed\",\n  \"email\": \"ahmed@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"deviceId\": \"device_postman_test\",\n  \"deviceName\": \"Postman Testing\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('token', response.data.token);",
+                  "    pm.environment.set('userId', response.data.user.id);",
+                  "    console.log('Login successful! Token saved.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+22212345678\",\n  \"password\": \"SecurePass123!\",\n  \"deviceId\": \"device_postman_test\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"SecurePass123!\",\n  \"newPassword\": \"NewSecurePass456!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "auth", "change-password"]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+22212345678\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "auth", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+22212345678\",\n  \"resetCode\": \"123456\",\n  \"newPassword\": \"ResetPass789!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "auth", "reset-password"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Create Transaction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('transactionId', response.data.transaction.id);",
+                  "    console.log('Transaction created!');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"contribution\",\n  \"amount\": 1000,\n  \"debits\": [\n    { \"accountId\": \"user_account_123\" }\n  ],\n  \"credits\": [\n    { \"accountId\": \"board_treasury_123\" }\n  ],\n  \"method\": \"cash\",\n  \"memo\": \"Monthly contribution for January 2025\",\n  \"month\": \"2025-01\",\n  \"category\": \"monthly\",\n  \"createdByNameAr\": \"أحمد محمد\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "transactions"]
+            }
+          }
+        },
+        {
+          "name": "List My Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/transactions?limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "transactions"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Transaction",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/transactions/{{transactionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "transactions", "{{transactionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Approve Transaction (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/transactions/{{transactionId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "transactions", "{{transactionId}}", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Reject Transaction (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Insufficient documentation provided\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/transactions/{{transactionId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "transactions", "{{transactionId}}", "reject"]
+            }
+          }
+        },
+        {
+          "name": "List Pending Approvals (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/transactions/pending?limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "transactions", "pending"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Elections",
+      "item": [
+        {
+          "name": "Create Election (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('electionId', response.data.election.id);",
+                  "    console.log('Election created!');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titleAr\": \"انتخاب رئيس المجلس\",\n  \"titleFr\": \"Election du président du conseil\",\n  \"descriptionAr\": \"انتخاب رئيس مجلس القرية\",\n  \"descriptionFr\": \"Election du président du conseil du village\",\n  \"type\": \"board_leader\",\n  \"candidateIds\": [\"user_candidate1\", \"user_candidate2\"],\n  \"startDate\": \"2025-02-01T00:00:00Z\",\n  \"endDate\": \"2025-02-07T23:59:59Z\",\n  \"requiresQuorum\": true,\n  \"quorumPercentage\": 50\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/elections",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "elections"]
+            }
+          }
+        },
+        {
+          "name": "List Elections",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/elections",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "elections"]
+            }
+          }
+        },
+        {
+          "name": "Get Election",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/elections/{{electionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "elections", "{{electionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Cast Vote",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"candidateId\": \"user_candidate1\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/elections/{{electionId}}/vote",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "elections", "{{electionId}}", "vote"]
+            }
+          }
+        },
+        {
+          "name": "Get Results",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/elections/{{electionId}}/results",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "elections", "{{electionId}}", "results"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Announcements",
+      "item": [
+        {
+          "name": "Create Announcement",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('announcementId', response.data.announcement.id);",
+                  "    console.log('Announcement created!');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titleAr\": \"إعلان هام\",\n  \"titleFr\": \"Annonce importante\",\n  \"contentAr\": \"محتوى الإعلان هنا...\",\n  \"contentFr\": \"Contenu de l'annonce ici...\",\n  \"authorNameAr\": \"أحمد محمد\",\n  \"category\": \"community\",\n  \"tags\": [\"مهم\", \"important\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/announcements",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "announcements"]
+            }
+          }
+        },
+        {
+          "name": "List Published Announcements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/announcements?limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "announcements"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Announcement",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/announcements/{{announcementId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "announcements", "{{announcementId}}"]
+            }
+          }
+        },
+        {
+          "name": "Publish Announcement (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/announcements/{{announcementId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "announcements", "{{announcementId}}", "publish"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
