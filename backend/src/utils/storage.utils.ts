@@ -172,7 +172,7 @@ function extractPathFromUrl(url: string): string | null {
     const pattern = new RegExp(`https://storage.googleapis.com/${bucketName}/(.+)`);
     const match = url.match(pattern);
 
-    return match ? match[1] : null;
+    return match ? match[1] || null : null;
   } catch (error) {
     return null;
   }
@@ -269,7 +269,7 @@ export async function generateTemporaryUrl(
  */
 export function validateFile(
   file: Buffer,
-  allowedTypes: readonly string[],
+  _allowedTypes: readonly string[],
   maxSize: number
 ): void {
   if (file.length > maxSize) {

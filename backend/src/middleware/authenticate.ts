@@ -113,7 +113,7 @@ export function authenticate(
  */
 export function optionalAuthenticate(
   req: AuthenticatedRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): void {
   const token = extractTokenFromHeader(req.headers.authorization);
@@ -156,7 +156,7 @@ export function authenticateUser(
   next: NextFunction
 ): void {
   // First authenticate
-  authenticate(req, res, () => {
+  authenticate(req, res, (_) => {
     // Check if user type is 'user'
     if (req.user?.type !== 'user') {
       log.warn('User authentication required but admin token provided', {
@@ -193,7 +193,7 @@ export function authenticateAdmin(
   next: NextFunction
 ): void {
   // First authenticate
-  authenticate(req, res, () => {
+  authenticate(req, res, (_) => {
     // Check if user type is 'admin'
     if (req.user?.type !== 'admin') {
       log.warn('Admin authentication required but user token provided', {

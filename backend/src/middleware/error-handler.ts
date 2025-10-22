@@ -153,9 +153,9 @@ export function errorHandler(
     error: {
       code: errorCode,
       message: errorMessage,
-      ...(errorDetails && { details: errorDetails }),
+      ...(errorDetails ? { details: errorDetails } : {}),
       // Include stack trace only in development
-      ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+      ...(process.env.NODE_ENV === 'development' ? { stack: error.stack } : {}),
     },
     timestamp: Date.now(),
   });

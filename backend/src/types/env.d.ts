@@ -48,6 +48,13 @@ declare global {
       EMAIL_PROVIDER?: string;
       EMAIL_API_KEY?: string;
       EMAIL_FROM?: string;
+
+      // Optional: Password Policy (future)
+      PASSWORD_MIN_LENGTH?: string;
+      PASSWORD_REQUIRE_NUMBER?: string;
+      PASSWORD_REQUIRE_SPECIAL_CHAR?: string;
+      PASSWORD_REQUIRE_UPPERCASE?: string;
+      PASSWORD_REQUIRE_LOWERCASE?: string;
     }
   }
 }

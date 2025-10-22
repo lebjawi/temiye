@@ -21,7 +21,7 @@ const log = createLogger(__filename);
  * @example
  * router.delete('/users/:id', authenticateAdmin, requireAdminType(['superadmin']), deleteUser);
  */
-export function requireAdminType(allowedTypes: string[]) {
+export function requireAdminType(_allowedTypes: string[]) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     const user = req.user;
 
@@ -267,7 +267,7 @@ export function requireSuperAdmin(
   }
 
   // Check if user has manageAdmins permission (superadmin indicator)
-  if (!user.permissions?.manageAdmins) {
+  if (!user.permissions?.['manageAdmins']) {
     log.warn('Superadmin authorization check failed', {
       requestId: req.requestId,
       adminId: user.sub,
