@@ -8,6 +8,9 @@
 import { Router, Request, Response } from 'express';
 import adminAuthRoutes from './admin-auth.routes';
 import authRoutes from './auth.routes';
+import transactionRoutes from './transaction.routes';
+import electionRoutes from './election.routes';
+import announcementRoutes from './announcement.routes';
 import { createLogger } from '../utils/logger.utils';
 
 const log = createLogger(__filename);
@@ -79,11 +82,19 @@ log.debug('Admin auth routes mounted at /api/admin/auth');
 router.use('/auth', authRoutes);
 log.debug('User auth routes mounted at /api/auth');
 
+// Transaction routes
+router.use('/transactions', transactionRoutes);
+log.debug('Transaction routes mounted at /api/transactions');
+
+// Election routes
+router.use('/elections', electionRoutes);
+log.debug('Election routes mounted at /api/elections');
+
+// Announcement routes
+router.use('/announcements', announcementRoutes);
+log.debug('Announcement routes mounted at /api/announcements');
+
 // TODO: Add more routes here as they are implemented
-// router.use('/users', userRoutes);
-// router.use('/transactions', transactionRoutes);
-// router.use('/elections', electionRoutes);
-// router.use('/announcements', announcementRoutes);
 // router.use('/boards', boardRoutes);
 // router.use('/roles', roleRoutes);
 // router.use('/tiers', tierRoutes);
