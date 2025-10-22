@@ -47,7 +47,7 @@ export class TransactionService {
 
   // Soft delete only (superadmin only)
   async deleteTransaction(id: string, deletedBy: string, reason: string): Promise<void> {
-    const transaction = await this.getTransactionById(id);
+    await this.getTransactionById(id);
 
     if (!reason || reason.length < 5) {
       throw new NotFoundError('Deletion reason is required (min 5 characters)');

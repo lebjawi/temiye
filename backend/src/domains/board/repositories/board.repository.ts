@@ -1,5 +1,5 @@
 import { Firestore } from 'firebase-admin/firestore';
-import { Board, BoardMember } from '../entities/Board';
+import { Board } from '../entities/Board';
 import { COLLECTIONS } from '../../../shared/config/firebase.config';
 
 export class BoardRepository {

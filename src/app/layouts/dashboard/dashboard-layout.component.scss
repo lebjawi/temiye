@@ -1,0 +1,61 @@
+@use '../../../styles/variables' as *;
+
+.dashboard-layout {
+  min-height: 100vh;
+  display: flex;
+  background: $bg-primary;
+
+  .dashboard-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    // Mobile: Full width
+    @media (max-width: $mobile-max) {
+      width: 100%;
+    }
+
+    // Tablet: Offset by sidebar width
+    @media (min-width: $tablet-min) and (max-width: $tablet-max) {
+      margin-left: $sidebar-tablet;
+      width: calc(100% - #{$sidebar-tablet});
+    }
+
+    // Desktop: Offset by sidebar width
+    @media (min-width: $desktop-min) {
+      margin-left: $sidebar-desktop;
+      width: calc(100% - #{$sidebar-desktop});
+    }
+
+    .dashboard-content {
+      flex: 1;
+      padding: $spacing-4;
+
+      @media (min-width: $tablet-min) {
+        padding: $spacing-6;
+      }
+
+      @media (min-width: $desktop-min) {
+        padding: $spacing-8;
+      }
+    }
+  }
+
+  // Overlay for mobile drawer
+  .dashboard-overlay {
+    display: none;
+
+    @media (max-width: $mobile-max) {
+      &.visible {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+      }
+    }
+  }
+}

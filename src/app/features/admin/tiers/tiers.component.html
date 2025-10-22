@@ -1,0 +1,192 @@
+<app-banner></app-banner>
+
+
+<div class="p-6">
+  <div class="mb-6 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Tier Management</h1>
+      <p class="text-gray-600 mt-1">Manage membership tiers and their features</p>
+    </div>
+    <button
+      (click)="openCreateModal()"
+      class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      Create Tier
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Tiers Grid -->
+  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div *ngFor="let tier of tiers" class="bg-white rounded-lg shadow p-6">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">{{ tier.name }}</h3>
+          <p class="text-sm text-gray-500">ID: {{ tier.id }}</p>
+        </div>
+        <span [class]="getLevelBadgeClass(tier.level)" class="px-2 py-1 text-xs font-semibold rounded-full">
+          Level {{ tier.level }}
+        </span>
+      </div>
+
+      <p *ngIf="tier.description" class="text-sm text-gray-600 mb-4">{{ tier.description }}</p>
+
+      <div class="mb-4">
+        <h4 class="text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Features</h4>
+        <ul class="space-y-1">
+          <li *ngFor="let feature of tier.features" class="text-sm text-gray-600 flex items-start">
+            <span class="text-green-500 mr-2">✓</span>
+            {{ feature }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+        <span *ngIf="tier.isPredefined" class="text-xs text-gray-500">Predefined</span>
+        <div class="flex space-x-2 ml-auto">
+          <button (click)="editTier(tier)" class="text-blue-600 hover:text-blue-900 text-sm font-medium">
+            Edit
+          </button>
+          <button
+            *ngIf="!tier.isPredefined"
+            (click)="deleteTier(tier)"
+            class="text-red-600 hover:text-red-900 text-sm font-medium"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create/Edit Tier Modal -->
+  <div
+    *ngIf="showCreateModal"
+    class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50"
+    (click)="closeCreateModal()"
+  >
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4" (click)="$event.stopPropagation()">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">
+          {{ editingTier ? 'Edit Tier' : 'Create New Tier' }}
+        </h2>
+      </div>
+
+      <div class="px-6 py-4 max-h-96 overflow-y-auto">
+        <div class="space-y-4">
+          <!-- Tier ID (only for new tiers) -->
+          <div *ngIf="!editingTier">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tier ID</label>
+            <input
+              type="text"
+              [(ngModel)]="newTier.id"
+              placeholder="e.g., diamond"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+            <p class="text-xs text-gray-500 mt-1">Lowercase, alphanumeric, 3-20 characters</p>
+          </div>
+
+          <!-- Tier Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tier Name</label>
+            <input
+              type="text"
+              [(ngModel)]="newTier.name"
+              placeholder="e.g., Diamond"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <!-- Level (only for new tiers) -->
+          <div *ngIf="!editingTier">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Level (1-10)</label>
+            <input
+              type="number"
+              [(ngModel)]="newTier.level"
+              min="1"
+              max="10"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+            <p class="text-xs text-gray-500 mt-1">Higher level = more premium tier</p>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              [(ngModel)]="newTier.description"
+              rows="3"
+              placeholder="Describe this tier..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            ></textarea>
+          </div>
+
+          <!-- Features -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Features</label>
+
+            <!-- Add Feature Input -->
+            <div class="flex space-x-2 mb-3">
+              <input
+                type="text"
+                [(ngModel)]="newFeature"
+                (keydown.enter)="addFeature()"
+                placeholder="Enter a feature..."
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              />
+              <button
+                type="button"
+                (click)="addFeature()"
+                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none"
+              >
+                Add
+              </button>
+            </div>
+
+            <!-- Features List -->
+            <div *ngIf="newTier.features.length > 0" class="space-y-2">
+              <div
+                *ngFor="let feature of newTier.features; let i = index"
+                class="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+              >
+                <span class="text-sm text-gray-700 flex items-center">
+                  <span class="text-green-500 mr-2">✓</span>
+                  {{ feature }}
+                </span>
+                <button
+                  type="button"
+                  (click)="removeFeature(i)"
+                  class="text-red-600 hover:text-red-900 text-sm font-medium"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+            <p *ngIf="newTier.features.length === 0" class="text-xs text-gray-500 mt-1">
+              No features added yet. Add features to describe what this tier offers.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+        <button
+          (click)="closeCreateModal()"
+          class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="editingTier ? updateTier() : createTier()"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {{ editingTier ? 'Update Tier' : 'Create Tier' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

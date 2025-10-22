@@ -3,7 +3,6 @@ import * as admin from 'firebase-admin';
 import { UnauthorizedError } from '../../../shared/errors/UnauthorizedError';
 import { ForbiddenError } from '../../../shared/errors/ForbiddenError';
 import { verifyToken, JwtPayload } from '../../../shared/utils/jwt.util';
-import { UserRepository } from '../../user/repositories/user.repository';
 import { AdminRepository } from '../../admin/repositories/admin.repository';
 import { getDb } from '../../../shared/config/firebase.config';
 
@@ -23,7 +22,7 @@ declare global {
  */
 export const authenticateJWT = async (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
@@ -60,7 +59,7 @@ export const authenticateJWT = async (
  */
 export const authenticateFirebase = async (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
@@ -117,7 +116,7 @@ export const authenticateFirebase = async (
  */
 export const authenticate = async (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<void> => {
   const authHeader = req.headers.authorization;
@@ -168,7 +167,7 @@ export const authenticate = async (
  * @param roles - Array of allowed role names
  */
 export const requireRole = (roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {
       return next(new UnauthorizedError('Authentication required'));
     }
@@ -189,7 +188,7 @@ export const requireRole = (roles: string[]) => {
  * Require Active User Status
  * Ensures user is active (not pending/banned/inactive)
  */
-export const requireActive = (req: Request, res: Response, next: NextFunction): void => {
+export const requireActive = (req: Request, _res: Response, next: NextFunction): void => {
   if (!req.user) {
     return next(new UnauthorizedError('Authentication required'));
   }
@@ -214,7 +213,7 @@ export const requireAdmin = requireRole(['admin']);
  */
 export const optionalAuth = async (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<void> => {
   const authHeader = req.headers.authorization;

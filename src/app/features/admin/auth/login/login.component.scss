@@ -1,0 +1,247 @@
+@use '../../../../../styles/variables' as *;
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-primary;
+  padding: $spacing-4;
+  position: relative;
+  overflow: hidden;
+
+  // Animated background gradient
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle at center,
+      rgba(0, 133, 72, 0.15) 0%,
+      transparent 50%
+    );
+    animation: pulse 15s ease-in-out infinite;
+  }
+
+  .login-card {
+    background: $bg-secondary;
+    border-radius: $radius-2xl;
+    border: 1px solid $border-default;
+    padding: $spacing-10;
+    box-shadow: $shadow-2xl;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+
+    // Subtle gradient border effect
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      background: linear-gradient(135deg,
+        rgba(0, 133, 72, 0.3) 0%,
+        transparent 50%,
+        rgba(0, 133, 72, 0.3) 100%);
+      border-radius: $radius-2xl;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
+
+    .logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: $spacing-8;
+
+      img {
+        height: 120px;
+        width: auto;
+        margin-bottom: $spacing-4;
+        filter: drop-shadow(0 4px 12px rgba(0, 133, 72, 0.3));
+      }
+
+      .logo-tagline {
+        font-family: $font-arabic;
+        font-size: $text-2xl;
+        font-weight: $font-bold;
+        background: $gradient-brand;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: $spacing-2 0;
+        letter-spacing: 2px;
+      }
+
+      .logo-subtitle {
+        font-family: $font-arabic;
+        font-size: $text-sm;
+        color: $text-tertiary;
+        margin: 0;
+      }
+    }
+
+    .title {
+      font-size: $text-3xl;
+      font-weight: $font-bold;
+      background: $gradient-brand;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: $spacing-2;
+    }
+
+    .subtitle {
+      font-size: $text-lg;
+      font-family: $font-arabic;
+      color: $text-tertiary;
+      margin-bottom: $spacing-8;
+    }
+
+    .error-banner {
+      background: rgba($error, 0.1);
+      border: 1px solid $error;
+      border-radius: $radius-lg;
+      padding: $spacing-3 $spacing-4;
+      margin-bottom: $spacing-6;
+      display: flex;
+      align-items: center;
+      gap: $spacing-2;
+
+      .error-icon {
+        font-size: $text-lg;
+      }
+
+      .error-text {
+        color: $text-primary;
+        font-size: $text-sm;
+        text-align: left;
+      }
+    }
+
+    .google-login-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-3;
+      padding: $spacing-4;
+      background: white;
+      color: #1f2937;
+      font-weight: $font-medium;
+      font-size: $text-base;
+      border: 1px solid #e5e7eb;
+      border-radius: $radius-lg;
+      cursor: pointer;
+      transition: all $transition-base;
+      box-shadow: $shadow-sm;
+      margin-bottom: $spacing-6;
+
+      &:hover:not(:disabled) {
+        background: #f9fafb;
+        box-shadow: $shadow-md;
+        transform: translateY(-1px);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: $shadow-xs;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: $spacing-3;
+      }
+
+      .google-icon {
+        height: 20px;
+        width: 20px;
+      }
+
+      .spinner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: $spacing-2;
+
+        .spinner-icon {
+          width: 16px;
+          height: 16px;
+          border: 2px solid $border-default;
+          border-top-color: $brand-green;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+      }
+    }
+
+    .notice {
+      margin-top: $spacing-6;
+      padding-top: $spacing-6;
+      border-top: 1px solid $border-subtle;
+      font-size: $text-xs;
+      color: $text-muted;
+      line-height: $leading-relaxed;
+
+      .notice-ar {
+        font-family: $font-arabic;
+        display: block;
+        margin-top: $spacing-1;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(180deg);
+  }
+}
+
+// Mobile adjustments
+@media (max-width: $mobile-max) {
+  .login-container {
+    padding: $spacing-2;
+
+    .login-card {
+      padding: $spacing-6;
+
+      .logo img {
+        height: 80px;
+      }
+
+      .title {
+        font-size: $text-2xl;
+      }
+
+      .subtitle {
+        font-size: $text-base;
+      }
+    }
+  }
+}

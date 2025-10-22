@@ -89,7 +89,7 @@ export class VoteController {
    *       405:
    *         description: Method Not Allowed - Votes are immutable
    */
-  async updateVote(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateVote(req: Request, _res: Response, next: NextFunction): Promise<void> {
     try {
       await this.voteService.updateVote(req.params.id, req.body);
     } catch (error) {
@@ -114,7 +114,7 @@ export class VoteController {
    *       405:
    *         description: Method Not Allowed - Votes are immutable
    */
-  async deleteVote(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async deleteVote(req: Request, _res: Response, next: NextFunction): Promise<void> {
     try {
       await this.voteService.deleteVote(req.params.id);
     } catch (error) {

@@ -1,0 +1,115 @@
+// ============================================
+// BRAND COLOR (from logo)
+// ============================================
+$brand-green: #008548;
+$brand-green-dark: #006838;
+$brand-green-light: #00a85a;
+
+// ============================================
+// DARK MODE BACKGROUNDS
+// ============================================
+$bg-primary: #0a0e1a;
+$bg-secondary: #151b2e;
+$bg-tertiary: #1f2937;
+$bg-hover: #2d3748;
+
+// ============================================
+// TEXT COLORS (Dark Mode)
+// ============================================
+$text-primary: #f8fafc;
+$text-secondary: #cbd5e1;
+$text-tertiary: #94a3b8;
+$text-disabled: #64748b;
+
+// ============================================
+// BORDERS & DIVIDERS
+// ============================================
+$border-color: #334155;
+$border-hover: #475569;
+$divider: #1e293b;
+
+// ============================================
+// SEMANTIC COLORS
+// ============================================
+$success: #10b981;
+$warning: #f59e0b;
+$error: #ef4444;
+$info: #3b82f6;
+
+// ============================================
+// ROLE COLORS
+// ============================================
+$role-member: #64748b;
+$role-board: $brand-green;
+$role-admin: $warning;
+$role-superadmin: $error;
+
+// ============================================
+// TYPOGRAPHY
+// ============================================
+$font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$font-arabic: 'Noto Sans Arabic', 'Dubai', 'Arial', sans-serif;
+
+$text-xs: 0.75rem;
+$text-sm: 0.875rem;
+$text-base: 1rem;
+$text-lg: 1.125rem;
+$text-xl: 1.25rem;
+$text-2xl: 1.5rem;
+$text-3xl: 1.875rem;
+$text-4xl: 2.25rem;
+
+$font-normal: 400;
+$font-medium: 500;
+$font-semibold: 600;
+$font-bold: 700;
+
+$leading-tight: 1.25;
+$leading-normal: 1.5;
+$leading-relaxed: 1.75;
+
+// ============================================
+// SPACING SCALE
+// ============================================
+$spacing-0: 0;
+$spacing-1: 0.25rem;
+$spacing-2: 0.5rem;
+$spacing-3: 0.75rem;
+$spacing-4: 1rem;
+$spacing-5: 1.25rem;
+$spacing-6: 1.5rem;
+$spacing-8: 2rem;
+$spacing-10: 2.5rem;
+$spacing-12: 3rem;
+$spacing-16: 4rem;
+
+// ============================================
+// BORDER RADIUS
+// ============================================
+$radius-sm: 0.25rem;
+$radius-md: 0.375rem;
+$radius-lg: 0.5rem;
+$radius-xl: 0.75rem;
+$radius-full: 9999px;
+
+// ============================================
+// SHADOWS
+// ============================================
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+// ============================================
+// BREAKPOINTS
+// ============================================
+$mobile-max: 767px;
+$tablet-min: 768px;
+$tablet-max: 1023px;
+$desktop-min: 1024px;
+$desktop-lg: 1280px;
+$desktop-xl: 1536px;
+
+$sidebar-mobile: 0px;
+$sidebar-tablet: 200px;
+$sidebar-desktop: 260px;

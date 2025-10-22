@@ -1,0 +1,215 @@
+@use '../../../../../styles/variables' as *;
+
+.dashboard-header {
+  height: 72px;
+  background: $bg-secondary;
+  border-bottom: 1px solid $border-subtle;
+  padding: 0 $spacing-8;
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  backdrop-filter: blur(10px);
+  background: rgba($bg-secondary, 0.95);
+
+  @media (max-width: $mobile-max) {
+    padding: 0 $spacing-4;
+  }
+
+  .hamburger-btn {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: $bg-tertiary;
+    border: 1px solid $border-default;
+    color: $text-primary;
+    cursor: pointer;
+    border-radius: $radius-lg;
+    transition: all $transition-base;
+
+    &:hover {
+      background: $bg-hover;
+      border-color: $border-strong;
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    @media (max-width: $mobile-max) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .header-title {
+    flex: 1;
+
+    h1 {
+      font-size: $text-2xl;
+      font-weight: $font-bold;
+      color: $text-primary;
+      margin: 0;
+
+      @media (max-width: $mobile-max) {
+        font-size: $text-lg;
+      }
+    }
+
+    p {
+      font-size: $text-sm;
+      color: $text-tertiary;
+      margin-top: $spacing-1;
+    }
+  }
+
+  .user-profile {
+    position: relative;
+
+    .profile-btn {
+      display: flex;
+      align-items: center;
+      gap: $spacing-3;
+      padding: $spacing-2 $spacing-3 $spacing-2 $spacing-2;
+      background: $bg-tertiary;
+      border: 1px solid $border-default;
+      border-radius: $radius-full;
+      color: $text-primary;
+      cursor: pointer;
+      transition: all $transition-base;
+
+      &:hover {
+        background: $bg-hover;
+        border-color: $border-strong;
+      }
+
+      .user-avatar,
+      .user-avatar-placeholder {
+        width: 36px;
+        height: 36px;
+        border-radius: $radius-full;
+      }
+
+      .user-avatar {
+        object-fit: cover;
+      }
+
+      .user-avatar-placeholder {
+        background: $gradient-brand;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: $font-semibold;
+        font-size: $text-sm;
+      }
+
+      .user-name {
+        font-size: $text-sm;
+        font-weight: $font-medium;
+
+        @media (max-width: $mobile-max) {
+          display: none;
+        }
+      }
+
+      .chevron-icon {
+        width: 16px;
+        height: 16px;
+        stroke-width: 2;
+      }
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + #{$spacing-2});
+      right: 0;
+      min-width: 220px;
+      background: $bg-tertiary;
+      border: 1px solid $border-default;
+      border-radius: $radius-xl;
+      box-shadow: $shadow-xl;
+      padding: $spacing-2;
+      z-index: 100;
+      animation: slideInUp 0.2s ease-out;
+
+      .dropdown-header {
+        padding: $spacing-4;
+
+        .user-email {
+          font-size: $text-sm;
+          color: $text-primary;
+          margin-bottom: $spacing-1;
+          font-weight: $font-medium;
+        }
+
+        .user-role {
+          display: inline-flex;
+          align-items: center;
+          padding: $spacing-1 $spacing-2;
+          background: rgba(0, 133, 72, 0.1);
+          color: $brand-green;
+          font-size: $text-xs;
+          border-radius: $radius-full;
+          text-transform: uppercase;
+          font-weight: $font-semibold;
+          letter-spacing: 0.05em;
+        }
+      }
+
+      .dropdown-divider {
+        height: 1px;
+        background: $border-subtle;
+        margin: $spacing-2 0;
+      }
+
+      .dropdown-item {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: $spacing-3;
+        padding: $spacing-3;
+        background: transparent;
+        border: none;
+        border-radius: $radius-lg;
+        color: $text-primary;
+        font-size: $text-sm;
+        font-weight: $font-medium;
+        cursor: pointer;
+        transition: all $transition-base;
+
+        &:hover {
+          background: $bg-hover;
+          color: $error;
+
+          svg {
+            transform: translateX(2px);
+          }
+        }
+
+        svg {
+          width: 18px;
+          height: 18px;
+          stroke-width: 2;
+          transition: transform $transition-base;
+        }
+      }
+    }
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

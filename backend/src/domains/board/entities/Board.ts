@@ -128,7 +128,7 @@ export class Board {
     this.updatedAt = new Date();
   }
 
-  archive(reason?: string): void {
+  archive(_reason?: string): void {
     this.status = 'archived';
     this.archivedAt = new Date();
     this.updatedAt = new Date();

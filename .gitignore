@@ -30,7 +30,7 @@ package-lock.json
 .history/*
 
 # Miscellaneous
-/.angular/cache
+/.angular/
 .sass-cache/
 /connect.lock
 /coverage
@@ -42,3 +42,6 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# AI generated files
+.playwright-mcp/

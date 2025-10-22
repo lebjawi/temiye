@@ -1,0 +1,103 @@
+@use '../variables' as *;
+@use 'sass:color';
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-2;
+  font-weight: $font-medium;
+  font-size: $text-sm;
+  line-height: $leading-tight;
+  border-radius: $radius-lg;
+  transition: all $transition-base;
+  cursor: pointer;
+  border: none;
+  outline: none;
+
+  // Sizes
+  &--sm {
+    padding: $spacing-2 $spacing-3;
+    font-size: $text-xs;
+  }
+
+  &--md {
+    padding: $spacing-2-5 $spacing-4;
+  }
+
+  &--lg {
+    padding: $spacing-3 $spacing-6;
+    font-size: $text-base;
+  }
+
+  // Primary (Brand Green with Gradient)
+  &--primary {
+    background: $gradient-brand;
+    color: $text-on-brand;
+    box-shadow: $shadow-sm, $shadow-brand;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: $shadow-md, $shadow-brand;
+      filter: brightness(1.1);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: $shadow-xs;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+
+  // Secondary (Outline)
+  &--secondary {
+    background: transparent;
+    color: $text-primary;
+    border: 1px solid $border-default;
+    box-shadow: $shadow-xs;
+
+    &:hover:not(:disabled) {
+      background: $bg-hover;
+      border-color: $border-strong;
+      box-shadow: $shadow-sm;
+    }
+  }
+
+  // Ghost (Minimal)
+  &--ghost {
+    background: transparent;
+    color: $text-secondary;
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.05);
+      color: $text-primary;
+    }
+  }
+
+  // Danger
+  &--danger {
+    background: linear-gradient(135deg,
+      color.adjust($error, $lightness: 5%) 0%,
+      $error 100%);
+    color: white;
+    box-shadow: $shadow-sm, $shadow-error;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: $shadow-md, $shadow-error;
+    }
+  }
+
+  // Icon only
+  &--icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
+}

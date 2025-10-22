@@ -117,7 +117,7 @@ export class TransactionController {
    *       405:
    *         description: Method Not Allowed - Transactions are immutable
    */
-  async updateTransaction(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateTransaction(req: Request, _res: Response, next: NextFunction): Promise<void> {
     try {
       await this.transactionService.updateTransaction(req.params.id, req.body);
     } catch (error) {

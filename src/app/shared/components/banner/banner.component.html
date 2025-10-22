@@ -1,0 +1,50 @@
+<div class="banner-container">
+  <div
+    *ngFor="let banner of banners"
+    [class]="'banner ' + getBannerClass(banner.type)"
+    role="alert"
+  >
+    <div class="banner-content">
+      <div class="banner-icon-wrapper">
+        <svg
+          class="banner-icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            [attr.d]="getIcon(banner.type)"
+          />
+        </svg>
+      </div>
+      <div class="banner-message">
+        {{ banner.message }}
+      </div>
+      <button
+        type="button"
+        class="banner-close"
+        (click)="removeBanner(banner.id)"
+        aria-label="Close banner"
+      >
+        <svg
+          class="banner-close-icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

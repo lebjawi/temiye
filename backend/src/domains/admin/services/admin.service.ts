@@ -3,7 +3,6 @@ import { AdminRepository } from '../repositories/admin.repository';
 import { CreateAdminDTO } from '../dtos/CreateAdminDTO';
 import { ConflictError } from '../../../shared/errors/ConflictError';
 import { NotFoundError } from '../../../shared/errors/NotFoundError';
-import { ForbiddenError } from '../../../shared/errors/ForbiddenError';
 
 export class AdminService {
   constructor(private adminRepository: AdminRepository) {}
@@ -45,7 +44,7 @@ export class AdminService {
     return this.adminRepository.findPendingApprovals();
   }
 
-  async approveAdmin(adminId: string, approvedBy: string, reason?: string): Promise<Admin> {
+  async approveAdmin(adminId: string, approvedBy: string, _reason?: string): Promise<Admin> {
     const admin = await this.getAdminById(adminId);
 
     if (!admin.isPending()) {
@@ -111,7 +110,7 @@ export class AdminService {
   }
 
   async deleteAdmin(id: string): Promise<void> {
-    const admin = await this.getAdminById(id);
+    await this.getAdminById(id); // Verify admin exists before deleting
     await this.adminRepository.delete(id);
   }
 }

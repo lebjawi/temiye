@@ -1,14 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { UnauthorizedError } from '../../../shared/errors/UnauthorizedError';
-import { verifyToken } from '../../../shared/utils/jwt.util';
+import { verifyToken, JwtPayload } from '../../../shared/utils/jwt.util';
 
 /**
  * Extend Express Request to include user property
+ * Note: Using the same type as in auth middleware to avoid conflicts
  */
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user?: JwtPayload & { isAdmin?: boolean };
     }
   }
 }
@@ -19,7 +20,7 @@ declare global {
  * Verifies JWT token from Authorization header
  * Attaches decoded user to req.user
  */
-export function authenticateJWT(req: Request, res: Response, next: NextFunction): void {
+export function authenticateJWT(req: Request, _res: Response, next: NextFunction): void {
   try {
     const authHeader = req.headers.authorization;
 

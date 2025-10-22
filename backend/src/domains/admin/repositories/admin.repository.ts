@@ -55,10 +55,11 @@ export class AdminRepository {
     const snapshot = await this.db
       .collection(this.collectionName)
       .where('status', '==', status)
-      .orderBy('createdAt', 'desc')
       .get();
 
-    return snapshot.docs.map(doc => this.toEntity({ id: doc.id, ...doc.data() }));
+    // Sort in memory since Firestore composite index is not created yet
+    const admins = snapshot.docs.map(doc => this.toEntity({ id: doc.id, ...doc.data() }));
+    return admins.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   async findPendingApprovals(): Promise<Admin[]> {

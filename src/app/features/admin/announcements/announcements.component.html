@@ -1,0 +1,258 @@
+<app-banner></app-banner>
+
+
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Announcements Management</h1>
+      <p class="text-gray-600 mt-1">Create and manage community announcements</p>
+    </div>
+    <button
+      (click)="openCreateModal()"
+      class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      + Create Announcement
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Announcements List -->
+  <div *ngIf="!loading" class="space-y-4">
+    <div
+      *ngFor="let announcement of announcements"
+      class="bg-white rounded-lg shadow p-6"
+      [class.border-2]="announcement.isPinned"
+      [class.border-yellow-400]="announcement.isPinned"
+    >
+      <!-- Header -->
+      <div class="flex justify-between items-start mb-3">
+        <div class="flex-1">
+          <div class="flex items-center space-x-2">
+            <h3 class="text-lg font-semibold text-gray-900">{{ announcement.title }}</h3>
+            <span *ngIf="announcement.isPinned" class="px-2 py-1 text-xs font-semibold rounded bg-yellow-100 text-yellow-800">
+              📌 Pinned
+            </span>
+            <span *ngIf="isExpired(announcement)" class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-800">
+              Expired
+            </span>
+          </div>
+          <p class="text-sm text-gray-500 mt-1">
+            By {{ announcement.author }} • {{ announcement.createdAt | date: 'medium' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <p class="text-sm text-gray-700 mb-4 whitespace-pre-wrap">{{ announcement.content }}</p>
+
+      <!-- Expiry Info -->
+      <div *ngIf="announcement.expiresAt && !isExpired(announcement)" class="mb-4 text-sm text-gray-600">
+        <span class="inline-flex items-center">
+          ⏰ Expires {{ announcement.expiresAt | date: 'short' }}
+          <span *ngIf="getDaysUntilExpiry(announcement) !== null" class="ml-2 text-xs text-gray-500">
+            ({{ getDaysUntilExpiry(announcement) }} days remaining)
+          </span>
+        </span>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex space-x-3 pt-3 border-t border-gray-200">
+        <button
+          (click)="editAnnouncement(announcement)"
+          class="text-sm text-blue-600 hover:text-blue-900 font-medium"
+        >
+          Edit
+        </button>
+        <button
+          (click)="togglePin(announcement)"
+          class="text-sm text-yellow-600 hover:text-yellow-900 font-medium"
+        >
+          {{ announcement.isPinned ? 'Unpin' : 'Pin' }}
+        </button>
+        <button
+          (click)="deleteAnnouncement(announcement)"
+          class="text-sm text-red-600 hover:text-red-900 font-medium"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="announcements.length === 0" class="bg-white rounded-lg shadow p-12 text-center">
+      <svg class="mx-auto h-24 w-24 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path d="M3 11l18-5v12L3 13v-2z" />
+        <path d="M11.6 16.8a3 3 0 11-5.8-1.6" />
+      </svg>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No Announcements Yet</h3>
+      <p class="text-gray-600 mb-4">Create your first announcement to keep the community informed</p>
+      <button
+        (click)="openCreateModal()"
+        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        + Create Announcement
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Announcement Modal -->
+<div
+  *ngIf="showCreateModal"
+  class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50"
+  (click)="closeCreateModal()"
+>
+  <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4" (click)="$event.stopPropagation()">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900">Create New Announcement</h2>
+    </div>
+
+    <div class="px-6 py-4 max-h-96 overflow-y-auto">
+      <div class="space-y-4">
+        <!-- Title -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+          <input
+            type="text"
+            [(ngModel)]="newAnnouncement.title"
+            placeholder="e.g., Community Meeting This Friday"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Content -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Content *</label>
+          <textarea
+            [(ngModel)]="newAnnouncement.content"
+            rows="6"
+            placeholder="Write your announcement here..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          ></textarea>
+          <p class="text-xs text-gray-500 mt-1">Use line breaks to format your message</p>
+        </div>
+
+        <!-- Pin Option -->
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            [(ngModel)]="newAnnouncement.isPinned"
+            id="pinned"
+            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <label for="pinned" class="ml-2 text-sm text-gray-700">
+            Pin this announcement (appears at the top)
+          </label>
+        </div>
+
+        <!-- Expiry Date (Optional) -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Expiry Date (Optional)</label>
+          <input
+            type="datetime-local"
+            [(ngModel)]="newAnnouncement.expiresAt"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+          <p class="text-xs text-gray-500 mt-1">Leave empty for permanent announcement</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+      <button
+        (click)="closeCreateModal()"
+        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="createAnnouncement()"
+        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        Create Announcement
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Announcement Modal -->
+<div
+  *ngIf="showEditModal"
+  class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50"
+  (click)="closeEditModal()"
+>
+  <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4" (click)="$event.stopPropagation()">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900">Edit Announcement</h2>
+    </div>
+
+    <div class="px-6 py-4 max-h-96 overflow-y-auto">
+      <div class="space-y-4">
+        <!-- Title -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+          <input
+            type="text"
+            [(ngModel)]="newAnnouncement.title"
+            placeholder="Announcement title"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Content -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Content *</label>
+          <textarea
+            [(ngModel)]="newAnnouncement.content"
+            rows="6"
+            placeholder="Announcement content..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          ></textarea>
+        </div>
+
+        <!-- Pin Option -->
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            [(ngModel)]="newAnnouncement.isPinned"
+            id="editPinned"
+            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <label for="editPinned" class="ml-2 text-sm text-gray-700">
+            Pin this announcement
+          </label>
+        </div>
+
+        <!-- Expiry Date -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Expiry Date (Optional)</label>
+          <input
+            type="datetime-local"
+            [(ngModel)]="newAnnouncement.expiresAt"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+      <button
+        (click)="closeEditModal()"
+        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="updateAnnouncement()"
+        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        Update Announcement
+      </button>
+    </div>
+  </div>
+</div>

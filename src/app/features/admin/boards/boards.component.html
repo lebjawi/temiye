@@ -1,0 +1,221 @@
+<app-banner></app-banner>
+
+
+<div class="p-6">
+  <div class="mb-6 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Board Management</h1>
+      <p class="text-gray-600 mt-1">Manage leadership boards and their members</p>
+    </div>
+    <button
+      (click)="openCreateModal()"
+      class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      Create Board
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Boards Grid -->
+  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let board of boards" class="bg-white rounded-lg shadow p-6">
+      <div class="flex justify-between items-start mb-4">
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-gray-900">{{ board.name }}</h3>
+          <p *ngIf="board.description" class="text-sm text-gray-600 mt-1">{{ board.description }}</p>
+        </div>
+        <span [class]="getStatusBadgeClass(board.status)" class="px-2 py-1 text-xs font-semibold rounded-full ml-2">
+          {{ board.status }}
+        </span>
+      </div>
+
+      <!-- Members Section -->
+      <div class="border-t border-gray-200 pt-4 mb-4">
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="text-xs font-medium text-gray-700 uppercase tracking-wider">
+            Members ({{ board.members.length }})
+          </h4>
+          <button
+            (click)="openMemberModal(board)"
+            class="text-xs text-blue-600 hover:text-blue-900 font-medium"
+          >
+            + Add Member
+          </button>
+        </div>
+
+        <ul class="space-y-2" *ngIf="board.members.length > 0">
+          <li *ngFor="let member of board.members" class="flex items-center justify-between text-sm">
+            <div class="flex items-center space-x-2">
+              <span [class]="getRoleBadgeClass(member.role)" class="px-2 py-0.5 text-xs font-medium rounded">
+                {{ member.role }}
+              </span>
+              <span class="text-gray-900">{{ getUserName(member.userId) }}</span>
+            </div>
+            <button
+              (click)="removeMember(board, member.userId)"
+              class="text-red-600 hover:text-red-900 text-xs font-medium"
+            >
+              Remove
+            </button>
+          </li>
+        </ul>
+
+        <p *ngIf="board.members.length === 0" class="text-xs text-gray-500 italic">No members yet</p>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+        <div class="flex space-x-2">
+          <button (click)="editBoard(board)" class="text-blue-600 hover:text-blue-900 text-sm font-medium">
+            Edit
+          </button>
+          <button
+            *ngIf="board.status === 'active'"
+            (click)="archiveBoard(board)"
+            class="text-yellow-600 hover:text-yellow-900 text-sm font-medium"
+          >
+            Archive
+          </button>
+          <button (click)="deleteBoard(board)" class="text-red-600 hover:text-red-900 text-sm font-medium">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create/Edit Board Modal -->
+  <div
+    *ngIf="showCreateModal"
+    class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50"
+    (click)="closeCreateModal()"
+  >
+    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4" (click)="$event.stopPropagation()">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">
+          {{ editingBoard ? 'Edit Board' : 'Create New Board' }}
+        </h2>
+      </div>
+
+      <div class="px-6 py-4">
+        <div class="space-y-4">
+          <!-- Board Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Board Name *</label>
+            <input
+              type="text"
+              [(ngModel)]="newBoard.name"
+              placeholder="e.g., Executive Board"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              [(ngModel)]="newBoard.description"
+              rows="3"
+              placeholder="Describe this board..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            ></textarea>
+          </div>
+
+          <!-- Parent Board (optional) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Parent Board (Optional)</label>
+            <select
+              [(ngModel)]="newBoard.parentBoardId"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option [ngValue]="undefined">None (Top-level board)</option>
+              <option *ngFor="let board of boards" [value]="board.id">{{ board.name }}</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">Select a parent board to create a sub-board</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+        <button
+          (click)="closeCreateModal()"
+          class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="editingBoard ? updateBoard() : createBoard()"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {{ editingBoard ? 'Update Board' : 'Create Board' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Member Modal -->
+  <div
+    *ngIf="showMemberModal"
+    class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50"
+    (click)="closeMemberModal()"
+  >
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" (click)="$event.stopPropagation()">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">
+          Add Member to {{ managingBoardMembers?.name }}
+        </h2>
+      </div>
+
+      <div class="px-6 py-4">
+        <div class="space-y-4">
+          <!-- Select User -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">User *</label>
+            <select
+              [(ngModel)]="newMember.userId"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select a user...</option>
+              <option *ngFor="let user of users" [value]="user.id">
+                {{ user.name }} ({{ user.phone }})
+              </option>
+            </select>
+          </div>
+
+          <!-- Select Role -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+            <select
+              [(ngModel)]="newMember.role"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="member">Member</option>
+              <option value="secretary">Secretary</option>
+              <option value="treasurer">Treasurer</option>
+              <option value="chair">Chairperson</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+        <button
+          (click)="closeMemberModal()"
+          class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="addMember()"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Add Member
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

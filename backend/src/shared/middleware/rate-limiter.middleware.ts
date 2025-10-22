@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 /**
  * Rate Limiter Middleware
@@ -26,12 +26,9 @@ export const generalLimiter = rateLimit({
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
 
   // Skip rate limiting for successful requests (optional)
-  skipSuccessfulRequests: false,
+  skipSuccessfulRequests: false
 
-  // Custom key generator (defaults to IP)
-  keyGenerator: (req) => {
-    return req.ip || req.socket.remoteAddress || 'unknown';
-  }
+  // Remove custom keyGenerator - use default which handles IPv6 properly
 });
 
 /**
@@ -61,7 +58,8 @@ export const authLimiter = rateLimit({
   keyGenerator: (req) => {
     // For auth, we can also use phone number if provided
     const phone = req.body?.phone;
-    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    // Use ipKeyGenerator helper which handles IPv6 properly
+    const ip = ipKeyGenerator(req.ip || '');
     return phone ? `${ip}-${phone}` : ip;
   }
 });
@@ -89,7 +87,8 @@ export const passwordResetLimiter = rateLimit({
 
   keyGenerator: (req) => {
     const phone = req.body?.phone;
-    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    // Use ipKeyGenerator helper which handles IPv6 properly
+    const ip = ipKeyGenerator(req.ip || '');
     return phone ? `${ip}-${phone}` : ip;
   }
 });
