@@ -142,6 +142,11 @@ export const Collections = {
   SYSTEM_METRICS: 'system_metrics',
   SYNC_METADATA: 'sync_metadata',
   SYSTEM_CONFIG: 'system_config',
+  // New collections
+  CONSTANTS: 'constants', // Global app settings
+  BLOG_POSTS: 'blog_posts', // Community blog posts
+  STORAGE_METADATA: 'storage_metadata', // File upload tracking
+  COMMENTS: 'comments', // Comments on blog posts and announcements
 } as const;
 
 /**

@@ -47,6 +47,8 @@ export class AdminService {
       publishAnnouncements: false,
       viewAuditLogs: false,
       manageSystemSettings: false,
+      manageBlogPosts: false,
+      manageComments: false,
     };
   }
 
@@ -73,6 +75,8 @@ export class AdminService {
           publishAnnouncements: true,
           viewAuditLogs: true,
           manageSystemSettings: true,
+          manageBlogPosts: true,
+          manageComments: true,
         };
 
       case 'finance_admin':
@@ -88,6 +92,8 @@ export class AdminService {
           publishAnnouncements: false,
           viewAuditLogs: true,
           manageSystemSettings: false,
+          manageBlogPosts: false,
+          manageComments: false,
         };
 
       case 'content_admin':
@@ -103,6 +109,8 @@ export class AdminService {
           publishAnnouncements: true,
           viewAuditLogs: false,
           manageSystemSettings: false,
+          manageBlogPosts: true, // Content admins manage blog posts
+          manageComments: true, // Content admins manage comments
         };
 
       case 'community_manager':

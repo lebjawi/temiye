@@ -27,6 +27,19 @@ export interface User {
   devices: Array<{ deviceId: string; lastSeenAt: Timestamp; deviceName?: string }>;
   passwordUpdatedAt?: Timestamp;
   mustChangePassword: boolean;
+  // Visual enhancements
+  photoUrl?: string; // Profile photo (Firebase Storage URL)
+  coverPhotoUrl?: string; // Profile banner/cover image
+  bioAr?: string; // Bio in Arabic
+  bioFr?: string; // Bio in French
+  location?: string; // User location (city, region)
+  socialLinks?: {
+    facebook?: string;
+    twitter?: string;
+    instagram?: string;
+    whatsapp?: string;
+    website?: string;
+  };
   createdAt: Timestamp;
   updatedAt: Timestamp;
   lastLoginAt?: Timestamp;
@@ -51,7 +64,11 @@ export interface Admin {
   id: string; // Firebase Auth UID
   email: string;
   displayName: string;
-  photoUrl?: string;
+  phone?: string; // Admin phone number
+  photoUrl?: string; // Profile photo
+  coverPhotoUrl?: string; // Profile banner
+  bioAr?: string; // Bio in Arabic
+  bioFr?: string; // Bio in French
   adminType: 'superadmin' | 'finance_admin' | 'content_admin' | 'community_manager';
   permissions: {
     manageAdmins: boolean;
@@ -65,6 +82,8 @@ export interface Admin {
     publishAnnouncements: boolean;
     viewAuditLogs: boolean;
     manageSystemSettings: boolean;
+    manageBlogPosts: boolean; // NEW
+    manageComments: boolean; // NEW
   };
   approvalStatus: 'pending' | 'approved' | 'rejected';
   requestedAt: Timestamp;
@@ -130,6 +149,10 @@ export interface Tier {
   descriptionFr?: string;
   benefits: string[];
   displayOrder: number;
+  // Visual enhancements
+  color?: string; // Hex color for UI badges (e.g., '#FFD700')
+  icon?: string; // Icon name or emoji
+  badge?: string; // Badge image URL from Firebase Storage
   createdAt: Timestamp;
   updatedAt: Timestamp;
   isActive: boolean;
@@ -152,10 +175,15 @@ export interface Board {
     roleId: string;
     roleNameAr: string;
     joinedAt: Timestamp;
+    photoUrl?: string; // Member photo
   }>;
   treasuryAccountId?: string;
   totalSpent: number;
   status: 'active' | 'inactive' | 'archived';
+  // Visual enhancements
+  logoUrl?: string; // Board logo
+  coverImageUrl?: string; // Board banner image
+  color?: string; // Hex color for UI
   createdAt: Timestamp;
   updatedAt: Timestamp;
   version: number;
@@ -227,18 +255,22 @@ export interface Transaction {
 
 export interface Announcement {
   id: string;
-  author: { id: string; nameAr: string; roleNameAr?: string };
+  author: { id: string; nameAr: string; roleNameAr?: string; photoUrl?: string };
   authorRef: DocumentReference;
   titleAr: string;
   titleFr?: string;
   contentAr: string;
   contentFr?: string;
+  featuredImageUrl?: string; // Main announcement image
   attachments: Array<{
     url: string;
     type: 'image' | 'document' | 'video';
     name: string;
     size?: number;
+    thumbnailUrl?: string; // For videos
   }>;
+  category?: string; // 'community', 'events', 'urgent'
+  tags: string[]; // Searchable tags
   status: 'draft' | 'pending' | 'published' | 'rejected' | 'archived';
   approvedBy?: { id: string; nameAr: string };
   approvedByRef?: DocumentReference;
@@ -248,6 +280,8 @@ export interface Announcement {
   expiresAt?: Timestamp;
   viewCount: number;
   shareCount: number;
+  likeCount: number; // NEW
+  commentCount: number; // NEW
   slug: string;
   shareLink: string;
   summary?: string;
@@ -266,12 +300,14 @@ export interface Election {
   boardRef?: DocumentReference;
   boardId?: string;
   boardNameAr?: string;
+  bannerImageUrl?: string; // Election banner image
   candidates: Array<{
     userId: string;
     nameAr: string;
     nameFr?: string;
     bio?: string;
     photoUrl?: string;
+    platform?: string; // Campaign message/platform
   }>;
   startDate: Timestamp;
   endDate: Timestamp;
@@ -531,3 +567,6 @@ export interface ApproveAdminInput {
 
 // Re-export Firestore types for convenience
 export { Timestamp, DocumentReference } from '@google-cloud/firestore';
+
+// Re-export enhancement types
+export type { Constants, BlogPost, StorageMetadata, Comment } from './enhancements';
