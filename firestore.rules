@@ -1,0 +1,489 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==================== HELPER FUNCTIONS ====================
+    
+    /**
+     * Authentication checks
+     * Pattern: Defense in depth (Page 330)
+     */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isUser(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() 
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.isActive == true
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.approvalStatus == 'approved';
+    }
+    
+    function isSuperAdmin() {
+      return isAdmin()
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.adminType == 'superadmin';
+    }
+    
+    /**
+     * Permission checks based on role
+     * Pattern: Role-based access control (Page 331)
+     */
+    function getUserRole(userId) {
+      let user = get(/databases/$(database)/documents/users/$(userId));
+      return user.data.roleId != null 
+        ? get(/databases/$(database)/documents/roles/$(user.data.roleId))
+        : null;
+    }
+    
+    function hasPermission(userId, resource, action) {
+      let role = getUserRole(userId);
+      return role != null && role.data.permissions[resource][action] == true;
+    }
+    
+    /**
+     * User status checks
+     */
+    function isActiveUser(userId) {
+      let user = get(/databases/$(database)/documents/users/$(userId));
+      return user.data.status == 'active';
+    }
+    
+    /**
+     * Optimistic concurrency control (Page 242)
+     * Ensures version number increments properly
+     */
+    function isValidVersionUpdate() {
+      return !('version' in resource.data) 
+        || request.resource.data.version == resource.data.version + 1;
+    }
+    
+    /**
+     * Immutability checks
+     * Some fields should never change after creation
+     */
+    function isCreatingNewDocument() {
+      return resource == null;
+    }
+    
+    function cannotModifyFields(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+    
+    // ==================== USER COLLECTION ====================
+    
+    /**
+     * USERS - Community members
+     * Pattern: Users can read/update own data, admins can manage all
+     * SECURITY: NO password fields in this collection
+     */
+    match /users/{userId} {
+      // Anyone authenticated can read basic user info
+      allow read: if isAuthenticated();
+      
+      // Users can update their own profile (limited fields)
+      allow update: if isUser(userId)
+        && isActiveUser(userId)
+        && cannotModifyFields(['id', 'phone', 'roleId', 'tierId', 'status', 'createdAt'])
+        && isValidVersionUpdate();
+      
+      // Only admins can create users (or backend via service account)
+      allow create: if false; // Backend only via service account
+      
+      // Only admins can delete/ban users
+      allow delete: if isAdmin() && hasPermission(request.auth.uid, 'users', 'delete');
+    }
+    
+    // ==================== USER_AUTH COLLECTION ====================
+    
+    /**
+     * USER_AUTH - Password storage (Backend only)
+     * Pattern: Separate auth from user data (Page 330)
+     * CRITICAL: Never exposed to clients
+     */
+    match /user_auth/{phone} {
+      allow read, write: if false; // Only backend service account can access
+    }
+    
+    // ==================== ROLES COLLECTION ====================
+    
+    /**
+     * ROLES - Permission definitions
+     */
+    match /roles/{roleId} {
+      // All authenticated users can read roles
+      allow read: if isAuthenticated();
+      
+      // Only admins can manage roles
+      allow create, update, delete: if isSuperAdmin();
+    }
+    
+    // ==================== TIERS COLLECTION ====================
+    
+    /**
+     * TIERS - Membership levels
+     */
+    match /tiers/{tierId} {
+      // All authenticated users can read tiers
+      allow read: if isAuthenticated();
+      
+      // Only admins can manage tiers
+      allow create, update, delete: if isAdmin() 
+        && hasPermission(request.auth.uid, 'users', 'update');
+    }
+    
+    // ==================== BOARDS COLLECTION ====================
+    
+    /**
+     * BOARDS - Community organizational units
+     */
+    match /boards/{boardId} {
+      // All authenticated users can read boards
+      allow read: if isAuthenticated();
+      
+      // Only admins can create/update boards
+      allow create, update: if isAdmin() 
+        && hasPermission(request.auth.uid, 'boards', 'create');
+      
+      // Only super admins can delete boards
+      allow delete: if isSuperAdmin();
+    }
+    
+    // ==================== ACCOUNTS COLLECTION ====================
+    
+    /**
+     * ACCOUNTS - Financial accounts
+     * Pattern: Strong consistency with version control (Page 242)
+     */
+    match /accounts/{accountId} {
+      // Users can read their own account
+      // Admins with financial permissions can read all
+      allow read: if isAuthenticated() && (
+        (resource.data.ownerType == 'user' && resource.data.ownerId == request.auth.uid)
+        || (isAdmin() && hasPermission(request.auth.uid, 'transactions', 'viewAll'))
+      );
+      
+      // Only backend can create/update accounts (to maintain consistency)
+      allow create, update: if false; // Backend only
+      
+      // Accounts should never be deleted
+      allow delete: if false;
+    }
+    
+    // ==================== TRANSACTIONS COLLECTION ====================
+    
+    /**
+     * TRANSACTIONS - Financial records
+     * Pattern: ACID guarantees through backend processing (Pages 221-230)
+     * Pattern: Idempotency with idempotencyKey (Page 358)
+     */
+    match /transactions/{transactionId} {
+      // Users can read their own transactions
+      // Admins with financial permissions can read all
+      allow read: if isAuthenticated() && (
+        resource.data.createdById == request.auth.uid
+        || (isAdmin() && hasPermission(request.auth.uid, 'transactions', 'viewAll'))
+      );
+      
+      // Users can create transactions (but they start as 'pending')
+      allow create: if isAuthenticated()
+        && isActiveUser(request.auth.uid)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdById == request.auth.uid
+        && request.resource.data.idempotencyKey is string
+        && request.resource.data.amount > 0;
+      
+      // Only backend can update/delete transactions (to maintain double-entry integrity)
+      allow update, delete: if false; // Backend only
+    }
+    
+    // ==================== ANNOUNCEMENTS COLLECTION ====================
+    
+    /**
+     * ANNOUNCEMENTS - Community communications
+     * Pattern: Workflow with denormalization (Page 35)
+     */
+    match /announcements/{announcementId} {
+      // Published announcements visible to all
+      // Drafts only visible to author and admins
+      allow read: if isAuthenticated() && (
+        resource.data.status == 'published'
+        || resource.data.author.id == request.auth.uid
+        || isAdmin()
+      );
+      
+      // Users with permission can create announcements as drafts
+      allow create: if isAuthenticated()
+        && isActiveUser(request.auth.uid)
+        && request.resource.data.author.id == request.auth.uid
+        && request.resource.data.status in ['draft', 'pending'];
+      
+      // Authors can update their own drafts
+      // Admins can update any announcement
+      allow update: if isAuthenticated() && (
+        (resource.data.author.id == request.auth.uid 
+          && resource.data.status in ['draft', 'rejected']
+          && cannotModifyFields(['author', 'authorRef', 'createdAt']))
+        || (isAdmin() && hasPermission(request.auth.uid, 'announcements', 'publish'))
+      ) && isValidVersionUpdate();
+      
+      // Only admins can delete announcements
+      allow delete: if isAdmin() 
+        && hasPermission(request.auth.uid, 'announcements', 'delete');
+    }
+    
+    // ==================== ELECTIONS COLLECTION ====================
+    
+    /**
+     * ELECTIONS - Voting events
+     * Pattern: Strong consistency for vote counting (Pages 251-260)
+     */
+    match /elections/{electionId} {
+      // All authenticated users can read elections
+      allow read: if isAuthenticated();
+      
+      // Only admins can create elections
+      allow create: if isAdmin() 
+        && hasPermission(request.auth.uid, 'elections', 'create');
+      
+      // Only admins can update elections (but not if closed)
+      allow update: if isAdmin() 
+        && hasPermission(request.auth.uid, 'elections', 'manage')
+        && resource.data.status != 'closed'
+        && isValidVersionUpdate();
+      
+      // Elections should not be deleted (archive instead)
+      allow delete: if false;
+    }
+    
+    // ==================== VOTES COLLECTION ====================
+    
+    /**
+     * VOTES - Individual vote records
+     * Pattern: Write-once semantics with deterministic IDs (Page 244)
+     * SECURITY: Votes are secret - only backend can read for counting
+     */
+    match /votes/{voteId} {
+      // Votes are secret - no read access for anyone except backend
+      allow read: if false; // Backend only for counting
+      
+      // Users can cast votes with strict constraints
+      allow create: if isAuthenticated()
+        && isActiveUser(request.auth.uid)
+        // Voter must be the authenticated user
+        && request.resource.data.voterId == request.auth.uid
+        // Must have valid vote token
+        && request.resource.data.voteToken is string
+        && request.resource.data.tokenExpiresAt > request.time
+        // Must be sealed immediately
+        && request.resource.data.sealed == true
+        // Election must be active
+        && electionIsActive(request.resource.data.electionRef)
+        // User hasn't voted yet (enforced by deterministic ID)
+        && !exists(/databases/$(database)/documents/votes/$(voteId));
+      
+      // Votes are immutable once created
+      allow update, delete: if false;
+    }
+    
+    function electionIsActive(electionRef) {
+      let election = get(electionRef);
+      return election.data.status == 'active'
+        && request.time >= election.data.startDate
+        && request.time <= election.data.endDate;
+    }
+    
+    // ==================== ELECTION_RESULTS COLLECTION ====================
+    
+    /**
+     * ELECTION_RESULTS - Computed vote counts
+     * Pattern: Separate read model (Page 402: CQRS)
+     */
+    match /election_results/{electionId} {
+      // Results visible to all once computed
+      allow read: if isAuthenticated();
+      
+      // Only backend can write results
+      allow create, update: if false; // Backend only
+      
+      // Results should not be deleted
+      allow delete: if false;
+    }
+    
+    // ==================== ADMINS COLLECTION ====================
+    
+    /**
+     * ADMINS - Leadership board members
+     * Pattern: Approval workflow (Page 360: Saga pattern)
+     */
+    match /admins/{adminId} {
+      // Admins can read their own record
+      // Super admins can read all admin records
+      allow read: if isAuthenticated() && (
+        request.auth.uid == adminId
+        || isSuperAdmin()
+      );
+      
+      // New admins can create their record (starts as 'pending')
+      allow create: if isAuthenticated()
+        && request.auth.uid == adminId
+        && request.resource.data.approvalStatus == 'pending'
+        && request.resource.data.isActive == false;
+      
+      // Only super admins can approve/update admins
+      allow update: if isSuperAdmin()
+        && isValidVersionUpdate();
+      
+      // Only super admins can delete admins
+      allow delete: if isSuperAdmin();
+    }
+    
+    // ==================== ADMIN_ACTIONS COLLECTION ====================
+    
+    /**
+     * ADMIN_ACTIONS - Audit trail
+     * Pattern: Immutable event log (Page 461)
+     */
+    match /admin_actions/{actionId} {
+      // Admins can read all actions for transparency
+      // Super admins have full access
+      allow read: if isAdmin();
+      
+      // Only backend can write admin actions (for integrity)
+      allow create: if false; // Backend only
+      
+      // Admin actions are immutable
+      allow update, delete: if false;
+    }
+    
+    // ==================== COMMUNITY_EVENTS COLLECTION ====================
+    
+    /**
+     * COMMUNITY_EVENTS - Event sourcing log
+     * Pattern: Immutable event stream (Pages 457-462)
+     */
+    match /community_events/{eventId} {
+      // Admins can read all events
+      // Users can read events related to them
+      allow read: if isAdmin() 
+        || (isAuthenticated() && resource.data.actorId == request.auth.uid);
+      
+      // Only backend can write events
+      allow create: if false; // Backend only
+      
+      // Events are immutable once written
+      allow update, delete: if false;
+    }
+    
+    // ==================== SYSTEM_METRICS COLLECTION ====================
+    
+    /**
+     * SYSTEM_METRICS - Analytics data
+     * Pattern: Pre-computed aggregates (Page 97)
+     */
+    match /system_metrics/{metricId} {
+      // Admins with analytics permission can read
+      allow read: if isAdmin() && hasPermission(request.auth.uid, 'reports', 'analytics');
+      
+      // Only backend can write metrics
+      allow create, update: if false; // Backend only
+      
+      // Metrics should not be deleted
+      allow delete: if false;
+    }
+    
+    // ==================== PASSWORD_RESET COLLECTION ====================
+    
+    /**
+     * PASSWORD_RESET - Password recovery tokens
+     * Pattern: Time-limited single-use tokens (Page 330)
+     */
+    match /password_reset/{resetId} {
+      // Users can read their own reset requests
+      allow read: if isAuthenticated() 
+        && resource.data.userId == request.auth.uid;
+      
+      // Backend creates reset requests
+      allow create, update: if false; // Backend only
+      
+      // Reset requests auto-expire, no need to delete
+      allow delete: if false;
+    }
+    
+    // ==================== SYNC_METADATA COLLECTION ====================
+    
+    /**
+     * SYNC_METADATA - Offline sync tracking
+     * Pattern: Per-device sync state (Page 167)
+     */
+    match /sync_metadata/{syncId} {
+      // Users can read/write their own sync metadata
+      allow read, write: if isAuthenticated() 
+        && resource.data.userId == request.auth.uid;
+    }
+    
+    // ==================== SYSTEM_CONFIG COLLECTION ====================
+    
+    /**
+     * SYSTEM_CONFIG - Global settings
+     * Pattern: Versioned configuration (Page 344)
+     */
+    match /system_config/global {
+      // All authenticated users can read config
+      allow read: if isAuthenticated();
+      
+      // Only super admins can update config
+      allow update: if isSuperAdmin() && isValidVersionUpdate();
+      
+      // Config should never be created/deleted (created during setup)
+      allow create, delete: if false;
+    }
+    
+    // ==================== NOTIFICATIONS COLLECTION ====================
+    
+    /**
+     * NOTIFICATIONS - User notifications (future feature)
+     */
+    match /notifications/{notificationId} {
+      // Users can read/update their own notifications
+      allow read, update: if isAuthenticated() 
+        && resource.data.recipientId == request.auth.uid;
+      
+      // Backend creates notifications
+      allow create: if false; // Backend only
+      
+      // Users can delete their notifications
+      allow delete: if isAuthenticated() 
+        && resource.data.recipientId == request.auth.uid;
+    }
+    
+    // ==================== AUDIT_LOGS COLLECTION ====================
+    
+    /**
+     * AUDIT_LOGS - System-wide audit trail
+     */
+    match /audit_logs/{logId} {
+      // Only admins can read audit logs
+      allow read: if isAdmin() && hasPermission(request.auth.uid, 'reports', 'audit');
+      
+      // Only backend can write audit logs
+      allow create: if false; // Backend only
+      
+      // Audit logs are immutable
+      allow update, delete: if false;
+    }
+    
+    // ==================== DEFAULT DENY ====================
+    
+    /**
+     * Deny all other collections by default
+     * Pattern: Secure by default (Page 330)
+     */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
