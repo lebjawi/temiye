@@ -1,0 +1,41 @@
+{
+  "name": "tenmiye-monorepo",
+  "version": "1.0.0",
+  "description": "Tenmiye Community Management System - Monorepo for Backend and Frontend",
+  "private": true,
+  "scripts": {
+    "prepare": "husky install",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "echo 'Frontend linting not yet configured'",
+    "format:backend": "cd backend && npm run format-fix",
+    "format:frontend": "echo 'Frontend formatting not yet configured'",
+    "validate:backend": "cd backend && npm run validate",
+    "validate:frontend": "echo 'Frontend validation not yet configured'"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "keywords": [
+    "tenmiye",
+    "community-management",
+    "mauritania",
+    "monorepo"
+  ],
+  "author": "Lebjawi Tech LLC",
+  "license": "PROPRIETARY",
+  "devDependencies": {
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0"
+  },
+  "lint-staged": {
+    "backend/src/**/*.ts": [
+      "cd backend && npm run lint:fix",
+      "cd backend && npm run format"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  }
+}
